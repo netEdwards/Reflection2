@@ -1,0 +1,8 @@
+.env
+.env.*
+.venv
+/.langgraph_api
+/.pytest_cache
+/.vscode
+/*.egg-info
+local_model

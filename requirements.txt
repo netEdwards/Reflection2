@@ -1,0 +1,33 @@
+# ── core CUDA stack ───────────────────────────────────────────
+
+numpy==2.0.1 
+
+# ── GPT‑Q & HF ecosystem ─────────────────────────────────────
+auto-gptq==0.7.1   # pre‑built wheel from HF index
+accelerate>=1.6.0
+transformers==4.51.3
+peft==0.15.2
+safetensors>=0.5.3
+huggingface-hub>=0.30.2
+datasets==3.5.1
+rouge==1.0.1
+
+# ── LangChain toolchain & vector DB helpers ──────────────────
+langchain
+langchain-openai
+langgraph
+langsmith
+chromadb
+sentence-transformers
+tiktoken
+mistune
+# ── quality‑of‑life / build speedups ─────────────────────────
+ninja          # fast C/C++ backend for PyTorch / GPT‑Q
+pytest
+
+# (everything else—numpy, pandas, pyarrow, xxhash, etc.—is pulled automatically)
+# python -m pip install \
+#   --index-url https://pypi.org/simple \
+#   --extra-index-url https://download.pytorch.org/whl/cu121 \
+#   --extra-index-url https://huggingface.github.io/autogptq-index/whl/cu121/ \
+#   -r requirements.txt

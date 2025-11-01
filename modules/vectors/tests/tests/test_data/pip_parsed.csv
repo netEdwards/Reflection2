@@ -1,0 +1,28 @@
+,type,style,attrs,children,tight,bullet,raw,marker
+0,thematic_break,,,,,,,
+1,heading,setext,{'level': 2},"[{'type': 'text', 'raw': 'title: ""Design Reflection - Modular AI Toolchain""'}, {'type': 'softbreak'}, {'type': 'text', 'raw': 'created: 2025-04-14'}, {'type': 'softbreak'}, {'type': 'text', 'raw': 'tags: '}, {'type': 'text', 'raw': '['}, {'type': 'text', 'raw': '#ai, #design, #modularity, #agentic]'}]",,,,
+2,blank_line,,,,,,,
+3,heading,atx,{'level': 1},"[{'type': 'text', 'raw': 'Design Reflection: Modular AI Toolchain'}]",,,,
+4,blank_line,,,,,,,
+5,heading,atx,{'level': 2},"[{'type': 'text', 'raw': 'Concept'}]",,,,
+6,blank_line,,,,,,,
+7,paragraph,,,"[{'type': 'text', 'raw': 'The foundational concept is to treat each AI component as a standalone module that communicates via defined interfaces. This approach allows for swapping models, tools, and even orchestration methods without tightly coupling the architecture.'}]",,,,
+8,blank_line,,,,,,,
+9,list,,"{'depth': 0, 'ordered': False}","[{'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'text', 'raw': 'Inspired by '}, {'type': 'link', 'children': [{'type': 'text', 'raw': 'functional programming'}], 'attrs': {'url': 'https://en.wikipedia.org/wiki/Functional_programming'}}]}]}, {'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'text', 'raw': 'Enables hot-swapping models in agent workflows'}]}]}, {'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'text', 'raw': 'Scales with complexity without rewriting the whole system'}]}]}]",True,-,,
+10,paragraph,,,"[{'type': 'text', 'raw': '['}, {'type': 'text', 'raw': '['}, {'type': 'text', 'raw': 'Agent Blueprint]]'}]",,,,
+11,blank_line,,,,,,,
+12,heading,atx,{'level': 2},"[{'type': 'text', 'raw': 'Architecture Overview'}]",,,,
+13,blank_line,,,,,,,
+14,heading,atx,{'level': 3},"[{'type': 'text', 'raw': 'System Layers'}]",,,,
+15,blank_line,,,,,,,
+16,list,,"{'depth': 0, 'ordered': True}","[{'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'strong', 'children': [{'type': 'text', 'raw': 'Input Layer'}]}, {'type': 'text', 'raw': ': User → Chat UI'}]}]}, {'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'strong', 'children': [{'type': 'text', 'raw': 'Orchestrator'}]}, {'type': 'text', 'raw': ': LangGraph-based'}]}]}, {'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'strong', 'children': [{'type': 'text', 'raw': 'Executor Layer'}]}, {'type': 'text', 'raw': ': Tool calls, model inferences'}]}]}, {'type': 'list_item', 'children': [{'type': 'block_text', 'children': [{'type': 'strong', 'children': [{'type': 'text', 'raw': 'Memory'}]}, {'type': 'text', 'raw': ': Vector DB + Prompt-injected scratchpad'}]}]}]",True,.,,
+17,heading,atx,{'level': 3},"[{'type': 'text', 'raw': 'Communication Patterns'}]",,,,
+18,blank_line,,,,,,,
+19,paragraph,,,"[{'type': 'text', 'raw': 'We use message passing between nodes. Each node operates on a shared state dict:'}]",,,,
+20,blank_line,,,,,,,
+21,block_code,fenced,{'info': 'python'},,,,"state = {
+  ""messages"": [...],
+  ""tools_used"": [...],
+  ""retrieved_docs"": [...]
+}
+",```

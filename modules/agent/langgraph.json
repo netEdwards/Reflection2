@@ -1,0 +1,10 @@
+{
+    "graphs": {
+        "build_graph": "modules.agent.agent_logic.main.main:build_graph"
+    },
+    "dependencies": [
+      "."
+    ],
+    "env": "./.env"
+}
+  
