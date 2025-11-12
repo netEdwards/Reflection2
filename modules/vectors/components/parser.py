@@ -27,10 +27,14 @@ def _to_elements(ast) -> List[Dict[str, Any]]:
             return
 
         t = n.get("type")
-
+        
+        # heading is in {'attrs': {'level': 1}}
+        
+            
         if t == "heading":
             txt = _extract_text(n.get("children", []))
-            level = int(n.get("level", 1))
+            level = int(n.get("attrs", {}).get("level", 1))
+            print(f"Current heading level: {level}")
             out.append({"type": "heading", "text": txt.strip(), "level": level})
 
         elif t in ("paragraph", "block_quote"):
