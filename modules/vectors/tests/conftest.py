@@ -28,24 +28,8 @@ def test_chunk_vault_to_dataframe():
             max_tokens=900,
             overlap=150,
         )
-
-        for c in chunks:
-            all_rows.append({
-                "file": str(md_path),
-                "index": c["metadata"]["chunk_index"],
-                "chunk_id": c["chunk_id"],
-                "tokens": c["tokens"],
-                "headings": " / ".join(c.get("heading_path", [])),
-                "text": c["text"],
-            })
-
-        
-        recon = "\n\n".join(ch["text"] for ch in sorted(chunks, key=lambda z: z["metadata"]["chunk_index"]))
-        (RECON_DIR / f"{md_path.stem}.reconstructed.md").write_text(recon, encoding="utf-8")
-
+    assert chunks is not None
     df = pd.DataFrame(all_rows).sort_values(["file", "index"]).reset_index(drop=True)
-    df.to_csv(ARTIFACTS_DIR / "chunks.csv", index=False, encoding="utf-8")
-
     
     assert not df.empty
     assert df["tokens"].max() <= 900

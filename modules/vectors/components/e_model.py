@@ -3,6 +3,8 @@
 import os
 from typing import List, Literal
 from langchain_openai import OpenAIEmbeddings
+import httpx
+import certifi
 
 
 class EmbeddingModel:
@@ -27,10 +29,16 @@ class EmbeddingModel:
         api_key = os.getenv("OPENAI_KEY")
         if not api_key:
             raise ValueError("❌ OPENAI_KEY not found in environment.")
+        
+        http_client = httpx.Client(
+            verify=certifi.where(),   # same thing that worked in your test
+            timeout=30.0,
+        )
 
         self.model = OpenAIEmbeddings(
             model=self.model_name,
             api_key=api_key,
+            http_client=http_client,
         )
 
     def embed(self, texts: List[str]) -> List[List[float]]:

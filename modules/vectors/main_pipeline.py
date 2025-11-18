@@ -1,3 +1,4 @@
+from modules.vectors.components.e_model import EmbeddingModel
 from modules.vectors.components.parser import MarkdownNoteParser
 from modules.vectors.components.chunker import chunk_elements
 from pathlib import Path
@@ -59,14 +60,33 @@ class pipeline:
             if parsed_md == None:
                 raise MarkdownParsingError("The returned dictionary from the parser was empty or an error was thrown silently.")
             
-            p_df = pd.DataFrame(parsed_md)
-            p_df.to_csv("./tests/test_data/pip_parsed.csv")
+            p_df = pd.DataFrame(parsed_md) #debugging use.
+            
 
-            chunked_md = chunk_elements(elements=p_df, doc_name=self.filename, doc_path=self.path)
+            chunked_md = chunk_elements(elements=parsed_md, doc_name=self.filename, doc_path=self.path)
             if chunked_md == None:
                 raise MarkdownChunkingError("There was nothing returned from the chunking method or an error was thrown silently.")
-            c_df = pd.DataFrame(chunked_md)
-            c_df.to_csv("./tests/test_data/pip_chunked.csv")
+            # Debugging | c_df = pd.DataFrame(chunked_md)
+            
+            
+            text_embedder = EmbeddingModel(model_type="openai", model_name="text-embedding-3-small", batch_size=64)
+            if text_embedder == None:
+                raise ValueError("The embedding model failed to initialize.")
+            
+            texts = [c["text"] for c in chunked_md]
+            vectors = text_embedder.embed(texts=texts)
+
+
+            if len(vectors) != len(chunked_md):
+                raise ValueError(
+                    f"Embedding count mismatch: {len(vectors)} vectors for {len(chunked_md)} chunks"
+                )
+            
+            chunked_md["embeddings"] = vectors
+
+            print(f"Pipeline completed successfully for file: {self.filename}")
+            return chunked_md
+
         except Exception as e:
             print(f"There was an error while processing the file {e}:")
             traceback.print_exc()
