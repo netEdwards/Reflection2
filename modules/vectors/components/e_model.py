@@ -5,6 +5,7 @@ from typing import List, Literal
 from langchain_openai import OpenAIEmbeddings
 import httpx
 import certifi
+from modules.vectors.settings import get_settings
 
 
 class EmbeddingModel:
@@ -12,11 +13,12 @@ class EmbeddingModel:
         self,
         model_type: Literal["openai"] = "openai",
         model_name: str = "text-embedding-3-small",
-        batch_size: int = 64,
+        batch_size: int | None = None,
         max_tokens_per_batch: int | None = None,
     ):
+        config = get_settings()
         self.model_type = model_type
-        self.batch_size = batch_size
+        self.batch_size = config.openai_embedding_batch_size if batch_size is None else batch_size
         self.max_tokens_per_batch = max_tokens_per_batch
         self.model_name = model_name
 

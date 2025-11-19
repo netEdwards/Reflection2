@@ -88,10 +88,7 @@ class pipeline:
                 chunk["embeddings"] = vec
                 
                 
-            store = ChromaVectorStore(
-                collection_name="markdown_notes",
-                persist_directory="./.chroma"
-            )
+            store = ChromaVectorStore()
             
             store.upsert_chunks(chunked_md)
 

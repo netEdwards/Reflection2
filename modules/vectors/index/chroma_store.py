@@ -6,17 +6,19 @@ from typing import List, Dict, Any, Optional
 import chromadb
 from chromadb.config import Settings
 from httpx import head
+from modules.vectors import settings
+from modules.vectors.settings import get_settings
 
 from modules.vectors.components.e_model import EmbeddingModel
 
 class ChromaVectorStore:
     def __init__(
         self,
-        persist_directory: str = "./.chroma",
-        collection_name: str = "reflection_notes",
     ):
-        self.persist_directory = persist_directory
-        self.collection_name = collection_name
+        
+        config = get_settings()
+        self.persist_directory = config.chroma_dir
+        self.collection_name = config.default_collection_name
         
         self.client = chromadb.PersistentClient(
             path=self.persist_directory,
@@ -65,18 +67,23 @@ class ChromaVectorStore:
             meta["tags"] = m.get("tags", "")
             meta["links"] = m.get("links", "")
             meta = {k: _clean_meta_value(v) for k, v in meta.items()} #sanatize the meta (fixes Path and other issues)
+            print("METAS: \n\n")
+            print(meta)
             metadatas.append(meta)
             
         if not ids:
             print("No valid chunks to upsert after processing; exiting. (Missing ID's)")
             return
         
-        self.collection.upsert(
-            ids=ids,
-            documents=documents,
-            embeddings=embeddings,
-            metadatas=metadatas
-        )
+        try:
+            self.collection.upsert(
+                ids=ids,
+                documents=documents,
+                embeddings=embeddings,
+                metadatas=metadatas
+            )
+        except Exception as e:
+            print(f"Error during upsert: {e}")
     
     def query(
         self,
@@ -91,16 +98,21 @@ class ChromaVectorStore:
                 model_name="text-embedding-3-small",
                 batch_size=32,
             )
-
-        query_vecs = embedder.embed(texts=query_texts)
-        if query_vecs is None or len(query_vecs) == 0:
-            print("Failed to generate embeddings for query texts.")
+        try:
+            query_vecs = embedder.embed(texts=query_texts)
+            if query_vecs is None or len(query_vecs) == 0:
+                print("Failed to generate embeddings for query texts.")
+                return None
+            
+            return self.collection.query(
+                query_embeddings=query_vecs,
+                n_results=n_results,
+                where=where,
+                include=["documents", "metadatas", "distances"],
+            )
+        except Exception as e:
+            print(f"Error during query: {e}")
             return None
-        
-        return self.collection.query(
-            query_embeddings=query_vecs,
-            n_results=n_results,
-        )
         
         
         
@@ -108,7 +120,9 @@ def _clean_meta_value(v):
     if isinstance(v, Path):
         return str(v)
     if isinstance(v, list):
-        return [_clean_meta_value(x) for x in v]
+        if not v:
+            return None #if empty
+        return ", ".join(str(_clean_meta_value(i)) for i in v)
     # allowed types for Chroma: str, int, float, bool, None
     if isinstance(v, (str, int, float, bool)) or v is None:
         return v
