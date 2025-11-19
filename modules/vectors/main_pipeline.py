@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 import sys
 import traceback
+
+from modules.vectors.index.chroma_store import ChromaVectorStore
 class InvalidMarkdownFileError(Exception):
     pass
 class MarkdownParsingError(Exception):
@@ -62,7 +64,7 @@ class pipeline:
             
             p_df = pd.DataFrame(parsed_md) #debugging use.
             
-
+            
             chunked_md = chunk_elements(elements=parsed_md, doc_name=self.filename, doc_path=self.path)
             if chunked_md == None:
                 raise MarkdownChunkingError("There was nothing returned from the chunking method or an error was thrown silently.")
@@ -82,7 +84,16 @@ class pipeline:
                     f"Embedding count mismatch: {len(vectors)} vectors for {len(chunked_md)} chunks"
                 )
             
-            chunked_md["embeddings"] = vectors
+            for chunk, vec in zip(chunked_md, vectors):
+                chunk["embeddings"] = vec
+                
+                
+            store = ChromaVectorStore(
+                collection_name="markdown_notes",
+                persist_directory="./.chroma"
+            )
+            
+            store.upsert_chunks(chunked_md)
 
             print(f"Pipeline completed successfully for file: {self.filename}")
             return chunked_md
