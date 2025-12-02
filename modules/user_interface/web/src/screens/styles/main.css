@@ -3,6 +3,9 @@ section {
     width: 100vw;
     display: flex;
     flex-direction: column;
+    color: white;
+    font-family: "Titillium Web", "Roboto";
+    font-weight: 600;
 }
 
 .header {
@@ -11,6 +14,8 @@ section {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    margin: 0;
+    background-color: rgb(25, 25, 25);
 }
 .header-button {
     max-width: 5rem;
@@ -30,4 +35,22 @@ section {
     flex-direction: column;
     align-items: center;
     gap: 2rem;
+}
+
+.normal_text {
+    font-size: 20px;
+    font-family: "Titillium Web", "Roboto";
+
+}
+.main-image {
+    width: 500px;
+    border-radius: 10px;
+}
+.section_03_buttons{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.section_03_buttons button{
+    margin: 1rem;
 }

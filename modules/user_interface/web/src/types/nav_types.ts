@@ -1,3 +1,4 @@
 export type Screen =
   | "home"
-  | "dataviewer";
+  | "dataviewer"
+  | "queryscreen";

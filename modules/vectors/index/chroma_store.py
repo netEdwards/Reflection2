@@ -1,11 +1,8 @@
 from pathlib import Path
-from pyexpat import model
 import re
-from turtle import heading
 from typing import List, Dict, Any, Optional
 import chromadb
 from chromadb.config import Settings
-from httpx import head
 from modules.vectors import settings
 from modules.vectors.settings import get_settings
 
@@ -31,6 +28,8 @@ class ChromaVectorStore:
             name=self.collection_name,
             metadata={"hnsw:space": "cosine"}
         )
+        
+        
         
     def upsert_chunks(self, chunks: List[Dict[str, Any]]) -> None:
         

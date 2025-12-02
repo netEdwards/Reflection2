@@ -5,16 +5,24 @@ import os
 from dataclasses import asdict
 from pathlib import Path
 
+from numpy import vecdot
 import webview
 
 from modules.vectors.VectorService import VectorService  
+from .window_ref import get_main_window, set_main_window
 
+_vector_service: VectorService | None = None
+
+def get_vector_service() -> VectorService:
+    global _vector_service
+    if _vector_service is None:
+        _vector_service = VectorService()
+    return _vector_service
 
 class JsApi:
     def __init__(self) -> None:
-        self.vectors = VectorService()
-        self.window: webview.Window | None = None
-
+        pass
+    
     # --- Ingestion ---------------------------------------------------
     
     def select_and_ingest_markdown_files(self) -> dict:
@@ -23,8 +31,9 @@ class JsApi:
         Returns:
             dict: IngestSummary
         """
-        # Check if window is connected
-        if self.window is None:
+        window = get_main_window()
+        
+        if window is None:
             return {
                 "files_processed": 0,
                 "total_chunks": 0,
@@ -36,7 +45,7 @@ class JsApi:
             "Markdown files (*.md;*.markdown)",
             "All files (*.*)",
         )
-        selected_paths = self.window.create_file_dialog(
+        selected_paths = window.create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=True,
             file_types=file_types,
@@ -51,8 +60,9 @@ class JsApi:
             
         #begin to ingest each to VectorService
         summaries = []
+        vectors = get_vector_service()
         for path in selected_paths:
-            summary = self.vectors.ingest_file(path)
+            summary = vectors.ingest_file(path)
             summaries.append(summary)
             
         #combine summaries later
@@ -70,14 +80,15 @@ class JsApi:
         """
         Open a folder picker, ingest all .md/.markdown files inside it.
         """
-        if self.window is None:
+        window = get_main_window()
+        if window is None:
             return {
                 "files_processed": 0,
                 "total_chunks": 0,
                 "errors": ["No window attached to JsApi"],
             }
 
-        folder = self.window.create_file_dialog(webview.FOLDER_DIALOG)
+        folder = window.create_file_dialog(webview.FOLDER_DIALOG)
         if not folder:
             return {
                 "files_processed": 0,
@@ -86,25 +97,29 @@ class JsApi:
             }
 
         folder_path = folder[0]  # pywebview returns a list
-        summary = self.vectors.ingest_directory(folder_path)
+        vectors = get_vector_service()
+        summary = vectors.ingest_directory(folder_path)
         return asdict(summary)
 
     def ingest_file(self, path: str) -> dict:
         """JS: window.pywebview.api.ingest_file(path)"""
-        summary = self.vectors.ingest_file(path)
+        vectors = get_vector_service()
+        summary = vectors.ingest_file(path)
         # IngestSummary is a dataclass, so asdict() makes it JSON-serializable
         return asdict(summary)
 
     def ingest_directory(self, path: str) -> dict:
         """JS: window.pywebview.api.ingest_directory(path)"""
-        summary = self.vectors.ingest_directory(path)
+        vectors = get_vector_service()
+        summary = vectors.ingest_directory(path)
         return asdict(summary)
 
     # --- Query -------------------------------------------------------
 
     def query(self, text: str, nResults: int = 5) -> dict:
         """JS: window.pywebview.api.query(text, nResults)"""
-        result = self.vectors.query(query_text=text, n_results=nResults)
+        vectors = get_vector_service()
+        result = vectors.query(query_text=text, n_results=nResults)
         # QueryResult has nested QueryResultChunk dataclasses :contentReference[oaicite:4]{index=4}
         return {
             "query": result.query,
@@ -144,8 +159,8 @@ def main():
         url=web_url,
         js_api=api,
     )
-
-    api.window = window
+    set_main_window(window)
+    #api.window = window
 
     webview.start()
 

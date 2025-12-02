@@ -42,7 +42,7 @@ class DiscordRichPresence:
                 try:
                     self._rpc.update(
                         details="Using Reflection",
-                        state="Empowering users cortex",
+                        state="As an AI its peaceful right now...",
                         large_image="reflection",
                         large_text="Reflection",
                     )
