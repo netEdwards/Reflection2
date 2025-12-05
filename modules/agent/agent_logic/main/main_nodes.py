@@ -9,6 +9,7 @@ from typing import Iterable
 
 from .main_state import State
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
+from modules.vectors.index.chroma_store import ChromaVectorStore
 # from modules.agent.agent_logic.utils.serializer import serialize_messages
 # from modules.agent.agent_logic.models.mistral_q import model_config_1
 from modules.agent.agent_logic.models.main_models import GPT4O
@@ -29,6 +30,11 @@ SYSTEM_PROMPT = SystemMessage(
 
 model = GPT4O
 
+def search_decision(state: State) -> State:
+    
+    
+    pass
+
 def generate(state: State) -> State:
     # 1) Build the prompt list: system + all past turns
     prompt_messages = [SYSTEM_PROMPT] + state["messages"]
@@ -44,3 +50,9 @@ def generate(state: State) -> State:
 
     # 5) Return the updated state; LangGraph will pass it on
     return state
+
+
+
+def execute_search(state: State) -> State:
+    pass
+

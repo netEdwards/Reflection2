@@ -3,7 +3,6 @@ import re
 from typing import List, Dict, Any, Optional
 import chromadb
 from chromadb.config import Settings
-from modules.vectors import settings
 from modules.vectors.settings import get_settings
 
 from modules.vectors.components.e_model import EmbeddingModel
@@ -11,11 +10,18 @@ from modules.vectors.components.e_model import EmbeddingModel
 class ChromaVectorStore:
     def __init__(
         self,
+        collection_name: Optional[str] = None,
     ):
         
         config = get_settings()
         self.persist_directory = config.chroma_dir
-        self.collection_name = config.default_collection_name
+        
+        if not collection_name:
+            self.collection_name = config.default_collection_name
+        else:
+            self.collection_name = collection_name
+        
+        
         
         self.client = chromadb.PersistentClient(
             path=self.persist_directory,
