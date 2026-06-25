@@ -5,19 +5,27 @@ import os
 from dataclasses import asdict
 from pathlib import Path
 
-from numpy import vecdot
+
 import webview
 
+from modules.orchestration.inference import ModelInterface
 from modules.vectors.VectorService import VectorService  
 from .window_ref import get_main_window, set_main_window
 
 _vector_service: VectorService | None = None
+_model_interface: ModelInterface | None = None
 
 def get_vector_service() -> VectorService:
     global _vector_service
     if _vector_service is None:
         _vector_service = VectorService()
     return _vector_service
+
+def get_model_interface() -> ModelInterface:
+    global _model_interface
+    if _model_interface is None:
+        _model_interface = ModelInterface()
+    return _model_interface
 
 class JsApi:
     def __init__(self) -> None:
@@ -134,6 +142,48 @@ class JsApi:
             ],
         }
 
+    # --- Model Interface -------------------------------------------------------
+    
+    def send_chat(self, prompt: str) -> dict:
+        """Send a message to the orchestration interface, recieve a dictionary containing an endpoint or local models response. 
+
+        Args:
+            prompt (str): Clean string of users prompt.
+
+        Returns:
+            dict: Serialized message object from orchestration.
+        """
+        model_interface = get_model_interface()
+        if not prompt:
+            return {
+                "error": "No prompt provided."
+            }
+            
+        resp = model_interface.run_text(prompt)
+        if not resp.text:
+            return {
+                "error": "There was an error with the response."
+            }
+        
+        return {
+            "id": resp.id,
+            "identity": resp.identity,
+            "text": resp.text,
+            "timestamp": resp.timestamp.isoformat(),
+        }
+    
+    def get_chats(self, t_from: str | None, t_to: str) -> dict:
+        """A function to retrieve a set of messages from the sql database.
+        Uses a time frame to retrieve a set of messages.
+        You can pass `t_from` as None and then a `t_to` datatime to get present to a specific date.  
+
+        Args:
+            t_from (str): ISO Format Datetime 
+            t_to (str): ISO Format Datetime
+
+        Returns:
+            dict: messages
+        """
 
 def _get_web_url() -> str:
     """
