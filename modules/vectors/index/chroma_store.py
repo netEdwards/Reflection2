@@ -98,13 +98,9 @@ class ChromaVectorStore:
         embedder: EmbeddingModel = None,
     ):
         if not embedder:
-            embedder = EmbeddingModel(
-                model_type="openai",
-                model_name="text-embedding-3-small",
-                batch_size=32,
-            )
+            embedder = EmbeddingModel(batch_size=32)
         try:
-            query_vecs = embedder.embed(texts=query_texts)
+            query_vecs = [embedder.embed_query(t) for t in query_texts]
             if query_vecs is None or len(query_vecs) == 0:
                 print("Failed to generate embeddings for query texts.")
                 return None

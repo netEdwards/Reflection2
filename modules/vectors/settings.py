@@ -37,8 +37,8 @@ class VectorsSettings:
     chroma_dir: Path
     default_collection_name: str
     
-    openai_embedding_model: str
-    openai_embedding_batch_size: int
+    embedding_model: str
+    embedding_batch_size: int
     
     @property
     def config_path(self) -> Path:
@@ -86,13 +86,13 @@ def get_settings() -> VectorsSettings:
 
     collection_name = cfg("CHROMA_COLLECTION", "reflection_notes")
 
-    emb_model = cfg("EMBEDDING_MODEL", "text-embedding-3-small")
+    emb_model = cfg("EMBEDDING_MODEL", "text-embedding-nomic-embed-text-v1.5:2")
     emb_batch = int(cfg("EMBEDDING_BATCH_SIZE", 64))
 
     return VectorsSettings(
         base_data_dir=base_data_dir,
         chroma_dir=chroma_dir,
         default_collection_name=collection_name,
-        openai_embedding_model=emb_model,
-        openai_embedding_batch_size=emb_batch,
+        embedding_model=emb_model,
+        embedding_batch_size=emb_batch,
     )

@@ -71,7 +71,7 @@ class pipeline:
             # Debugging | c_df = pd.DataFrame(chunked_md)
             
             
-            text_embedder = EmbeddingModel(model_type="openai", model_name="text-embedding-3-small", batch_size=64)
+            text_embedder = EmbeddingModel()
             if text_embedder == None:
                 raise ValueError("The embedding model failed to initialize.")
             
