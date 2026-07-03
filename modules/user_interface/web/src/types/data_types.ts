@@ -18,6 +18,21 @@ export interface QueryResult {
   results: QueryResultChunk[];
 }
 
+export interface ChatMessage {
+  id: string;
+  identity: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface ChatResponse extends Partial<ChatMessage> {
+  error?: string;
+}
+
+export interface GetChatsResult {
+  messages: ChatMessage[];
+}
+
 // pywebview API surface that JS expects
 export interface PywebviewApi {
   ingest_file(path: string): Promise<IngestSummary>;
@@ -26,4 +41,7 @@ export interface PywebviewApi {
 
   select_and_ingest_markdown_files(): Promise<IngestSummary>;
   select_and_ingest_markdown_folder(): Promise<IngestSummary>;
+
+  send_chat(prompt: string): Promise<ChatResponse>;
+  get_chats(t_from?: string | null, t_to?: string | null): Promise<GetChatsResult>;
 }

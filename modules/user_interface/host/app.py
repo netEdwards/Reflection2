@@ -9,7 +9,8 @@ from pathlib import Path
 import webview
 
 from modules.orchestration.inference import ModelInterface
-from modules.vectors.VectorService import VectorService  
+from modules.orchestration.sql.chatLogStore import ChatLogStore
+from modules.vectors.VectorService import VectorService
 from .window_ref import get_main_window, set_main_window
 
 _vector_service: VectorService | None = None
@@ -172,18 +173,31 @@ class JsApi:
             "timestamp": resp.timestamp.isoformat(),
         }
     
-    def get_chats(self, t_from: str | None, t_to: str) -> dict:
+    def get_chats(self, t_from: str | None = None, t_to: str | None = None) -> dict:
         """A function to retrieve a set of messages from the sql database.
         Uses a time frame to retrieve a set of messages.
-        You can pass `t_from` as None and then a `t_to` datatime to get present to a specific date.  
+        You can pass `t_from` as None and then a `t_to` datatime to get present to a specific date.
 
         Args:
-            t_from (str): ISO Format Datetime 
+            t_from (str): ISO Format Datetime
             t_to (str): ISO Format Datetime
 
         Returns:
             dict: messages
         """
+        chat_logger = ChatLogStore()
+        messages = chat_logger.list_messages(t_from=t_from, t_to=t_to)
+        return {
+            "messages": [
+                {
+                    "id": m.id,
+                    "identity": m.identity,
+                    "text": m.text,
+                    "timestamp": m.timestamp if isinstance(m.timestamp, str) else m.timestamp.isoformat(),
+                }
+                for m in messages
+            ]
+        }
 
 def _get_web_url() -> str:
     """

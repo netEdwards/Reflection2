@@ -12,13 +12,14 @@ from dotenv import load_dotenv
 import lmstudio as lms
 
 from modules.orchestration.sql.chatLogStore import ChatLogStore
+from modules.orchestration.orc_settings import get_settings
 load_dotenv()
 
 http_client = httpx.Client(verify=certifi.where(), timeout=30.0)
 
 class  ModelInterface:
-    def __init__(self, model: str = "qwen2.5-7b-instruct") -> None:
-        self.model = lms.llm(model)
+    def __init__(self, model: str | None = None) -> None:
+        self.model = lms.llm(model or get_settings().default_model)
         
         
         
@@ -74,3 +75,4 @@ class  ModelInterface:
             text=input,
             timestamp=datetime.now(),
         )
+        return self.run(msg)

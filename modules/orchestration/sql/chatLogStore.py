@@ -99,6 +99,47 @@ class ChatLogStore:
                         )
         return cur.rowcount > 0
     
+    def list_messages(self, t_from: str | None = None, t_to: str | None = None) -> list[Message]:
+        """List messages ordered by timestamp, optionally bounded by an ISO datetime range.
+
+        Args:
+            t_from (str | None): ISO format datetime lower bound (inclusive). None means unbounded.
+            t_to (str | None): ISO format datetime upper bound (inclusive). None means unbounded.
+
+        Returns:
+            list[Message]: Messages ordered oldest to newest.
+        """
+        clauses = []
+        params: list[str] = []
+        if t_from is not None:
+            clauses.append("timestamp >= ?")
+            params.append(t_from)
+        if t_to is not None:
+            clauses.append("timestamp <= ?")
+            params.append(t_to)
+
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+
+        cur = self.conn.cursor()
+        cur.execute(
+            f"""
+            SELECT id, identity, text, timestamp
+            FROM {self.table}
+            {where}
+            ORDER BY timestamp ASC;
+            """,
+            params,
+        )
+        return [
+            Message(
+                id=row["id"],
+                identity=row["identity"],
+                text=row["text"],
+                timestamp=row["timestamp"],
+            )
+            for row in cur.fetchall()
+        ]
+
     def get(self, msg_id: str) -> Message | None:
         cur = self.conn.cursor()
         cur.execute(f"""

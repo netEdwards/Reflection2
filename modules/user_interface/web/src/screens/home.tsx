@@ -20,6 +20,7 @@ const Home = ({ onNavigate }: HomeScreenProps) => {
             <div className="section_03_buttons">
                 <button className="button_01" onClick={() => onNavigate("dataviewer")}>Data Viewer</button>
                 <button className="button_01" onClick={() => onNavigate("queryscreen")}>Query Screen</button>
+                <button className="button_01" onClick={() => onNavigate("chat")}>Chat</button>
                 <Button variant="primary" size="md" onClick={() => onNavigate("dataviewer")}>Test</Button>
             </div>
         </section>

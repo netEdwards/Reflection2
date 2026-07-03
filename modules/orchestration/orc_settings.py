@@ -86,7 +86,7 @@ def get_settings() -> OrchestrationSettings:
 
     chat_db_path = Path(cfg("CHAT_DB_PATH", sql_dir / "chats.sqlite"))
 
-    default_model = str(cfg("DEFAULT_MODEL", "gpt-4o-mini"))
+    default_model = str(cfg("DEFAULT_MODEL", "qwen3-4b"))
     request_timeout_s = float(cfg("REQUEST_TIMEOUT_S", 30.0))
     
     messages_table_name = str(cfg("MSG_TABLE_NAME", "messages"))

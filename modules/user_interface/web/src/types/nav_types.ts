@@ -1,4 +1,5 @@
 export type Screen =
   | "home"
   | "dataviewer"
-  | "queryscreen";
+  | "queryscreen"
+  | "chat";
