@@ -3,6 +3,7 @@ import type { Screen } from "../types/nav_types";
 import './styles/main.css'
 import type { QueryResult } from "../types/data_types";
 import { getPywebviewApi } from "../pywebviewApi";
+import { Header } from "../components/Header";
 
 interface QueryScreenProps {
     onNavigate: (to: Screen) => void;
@@ -40,11 +41,8 @@ const QueryScreen = ({ onNavigate }: QueryScreenProps) => {
 
     return (
         <section>
-            <div className="header">
-                <h1>Query Current Data</h1>
-                <button onClick={() => onNavigate("home")}> Home </button>
-            </div>
-            <div>
+            <Header title="Query Current Data" onNavigate={onNavigate} />
+            <div className="screen-content">
                 <form onSubmit={handleSubmit} className="query-form">
                     <p>Input a natural language query that matches the language you have been using in your notes.</p>
                     <input
@@ -60,31 +58,31 @@ const QueryScreen = ({ onNavigate }: QueryScreenProps) => {
                 </form>
 
                 {error && <p className="error-message">Error: {error}</p>}
+                {result && (
+                    <div className="query-results">
+                    <h2>Results for: "{result.query}"</h2>
+                    {result.results.length === 0 && <p>No results found.</p>}
+                    <ul>
+                        {result.results.map((r, idx) => (
+                        <li key={idx} className="query-result-item">
+                            <div className="result-header">
+                            <strong>{r.document}</strong>
+                            <span className="result-score">
+                                score: {r.score.toFixed(4)}
+                            </span>
+                            </div>
+                            {r.metadata?.heading_path && (
+                            <div className="result-heading-path">
+                                {r.metadata.heading_path}
+                            </div>
+                            )}
+                            <pre className="result-text">{r.text}</pre>
+                        </li>
+                        ))}
+                    </ul>
+                    </div>
+                )}
             </div>
-            {result && (
-                <div className="query-results">
-                <h2>Results for: “{result.query}”</h2>
-                {result.results.length === 0 && <p>No results found.</p>}
-                <ul>
-                    {result.results.map((r, idx) => (
-                    <li key={idx} className="query-result-item">
-                        <div className="result-header">
-                        <strong>{r.document}</strong>
-                        <span className="result-score">
-                            score: {r.score.toFixed(4)}
-                        </span>
-                        </div>
-                        {r.metadata?.heading_path && (
-                        <div className="result-heading-path">
-                            {r.metadata.heading_path}
-                        </div>
-                        )}
-                        <pre className="result-text">{r.text}</pre>
-                    </li>
-                    ))}
-                </ul>
-                </div>
-            )}
         </section>
     )
 }

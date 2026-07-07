@@ -226,6 +226,8 @@ def main():
         title="Reflection",
         url=web_url,
         js_api=api,
+        maximized=True,
+        min_size=(1000, 700),
     )
     set_main_window(window)
     #api.window = window

@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import type {Screen} from "../types/nav_types"
 import { getPywebviewApi } from "../pywebviewApi";
 import type { IngestSummary } from "../types/data_types";
+import { Header } from "../components/Header";
+import "./styles/main.css";
 
 interface DvScreenProps {
     onNavigate: (to: Screen) => void;
@@ -55,31 +57,30 @@ const DataViewerScreen = ({ onNavigate }: DvScreenProps) => {
 
     return (
         <section className="data-viewer-screen">
-            <div className="header">
-                <h1>Data Viewer</h1>
-                <button onClick={() => onNavigate("home")} className="header-button">Home</button>
-            </div>
-            <div className="ingest-block">
-                {loading ? (<p>Ingesting files, please wait...</p>) : (<h2>Ingest Markdown Files</h2>)}
-                <button type="button" onClick={handleIngestFiles}>Select Files</button>
-                {error && <p className="error-message">Error: {error}</p>}
-                {ingestResult && (
-                    <div style={{ marginTop: "1rem" }}>
-                        <h3>Ingest summary</h3>
-                        <p>Files processed: {ingestResult.files_processed}</p>
-                        <p>Total chunks: {ingestResult.total_chunks}</p>
-                        {ingestResult.errors.length > 0 && (
-                        <>
-                            <h4>Errors</h4>
-                            <ul>
-                            {ingestResult.errors.map((err, i) => (
-                                <li key={i}>{err}</li>
-                            ))}
-                            </ul>
-                        </>
-                        )}
-                    </div>
-                )}
+            <Header title="Data Viewer" onNavigate={onNavigate} />
+            <div className="screen-content">
+                <div className="ingest-block">
+                    {loading ? (<p>Ingesting files, please wait...</p>) : (<h2>Ingest Markdown Files</h2>)}
+                    <button type="button" onClick={handleIngestFiles}>Select Files</button>
+                    {error && <p className="error-message">Error: {error}</p>}
+                    {ingestResult && (
+                        <div style={{ marginTop: "1rem" }}>
+                            <h3>Ingest summary</h3>
+                            <p>Files processed: {ingestResult.files_processed}</p>
+                            <p>Total chunks: {ingestResult.total_chunks}</p>
+                            {ingestResult.errors.length > 0 && (
+                            <>
+                                <h4>Errors</h4>
+                                <ul>
+                                {ingestResult.errors.map((err, i) => (
+                                    <li key={i}>{err}</li>
+                                ))}
+                                </ul>
+                            </>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </section>
     )

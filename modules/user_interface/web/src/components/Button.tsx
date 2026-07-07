@@ -7,25 +7,27 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     size?: ButtonSize;
 };
 const baseStyle: React.CSSProperties = {
-    border: "",
-    borderRadius: "",
+    border: "none",
+    borderRadius: "10px",
+    fontFamily: "inherit",
+    fontWeight: 600,
+    cursor: "pointer",
+    color: "white",
 }
 
 const variants: Record<ButtonVariant, React.CSSProperties> = {
     primary: {
-        background: "",
-        color: "",
+        background: "rgb(90, 100, 200)",
     },
     secondary: {
-        background: "",
-        color: "",
+        background: "rgb(45, 45, 45)",
     },
 };
 
 const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
-    sm: {padding: "", fontSize: ""},
-    md: {padding: "", fontSize: ""},
-    lg: {padding: "", fontSize: ""},
+    sm: { padding: "0.45rem 0.9rem", fontSize: "0.85rem" },
+    md: { padding: "0.7rem 1.4rem", fontSize: "1rem" },
+    lg: { padding: "0.9rem 1.8rem", fontSize: "1.1rem" },
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -37,8 +39,8 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
     const combinedStyles: React.CSSProperties = {
         ...baseStyle,
-        ...variants,
-        ...sizeStyles,
+        ...variants[variant],
+        ...sizeStyles[size],
         ...style, //overrides...
     }
     return (

@@ -1,7 +1,6 @@
-
-import type {Screen} from "../types/nav_types"
+import type { Screen } from "../types/nav_types"
 import './styles/main.css'
-import logo from '../assets/reflection_identity.png' 
+import logo from '../assets/reflection_identity_web.png'
 import { Button } from "../components/Button";
 
 interface HomeScreenProps {
@@ -11,17 +10,16 @@ interface HomeScreenProps {
 const Home = ({ onNavigate }: HomeScreenProps) => {
     return (
         <section className="home-screen">
-            <h1 className="header">Welcome to Reflection</h1>
-            <p className="normal_text">Your personal AI assistant for thoughtful reflection.</p>
-            <img
-                src={logo}
-                className="main-image"
-            />
-            <div className="section_03_buttons">
-                <button className="button_01" onClick={() => onNavigate("dataviewer")}>Data Viewer</button>
-                <button className="button_01" onClick={() => onNavigate("queryscreen")}>Query Screen</button>
-                <button className="button_01" onClick={() => onNavigate("chat")}>Chat</button>
-                <Button variant="primary" size="md" onClick={() => onNavigate("dataviewer")}>Test</Button>
+            <div className="home-hero">
+                <img src={logo} className="main-image" alt="Reflection" />
+                <h1 className="home-title">Reflection</h1>
+                <p className="normal_text">Your personal AI assistant for thoughtful reflection.</p>
+                <div className="section_03_buttons">
+                    <Button variant="primary" size="lg" onClick={() => onNavigate("chat")}>Chat</Button>
+                    <Button variant="secondary" size="md" onClick={() => onNavigate("dataviewer")}>Data Viewer</Button>
+                    <Button variant="secondary" size="md" onClick={() => onNavigate("queryscreen")}>Query Screen</Button>
+                    <Button variant="secondary" size="sm" onClick={() => onNavigate("dataviewer")}>Test</Button>
+                </div>
             </div>
         </section>
     )

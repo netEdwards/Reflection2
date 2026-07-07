@@ -3,6 +3,7 @@ import type { Screen } from "../types/nav_types";
 import './styles/main.css'
 import type { ChatMessage } from "../types/data_types";
 import { getPywebviewApi } from "../pywebviewApi";
+import { Header } from "../components/Header";
 
 
 interface ChatScreenProps {
@@ -99,10 +100,7 @@ const ChatScreen = ({ onNavigate }: ChatScreenProps) => {
 
     return (
         <section className="chat-screen">
-            <div className="header">
-                <h1>Chat</h1>
-                <button onClick={() => onNavigate("home")} className="header-button">Home</button>
-            </div>
+            <Header title="Chat" onNavigate={onNavigate} />
             <div className="chat-messages">
                 {messages.map((m) => (
                     <div key={m.id} className={`chat-message chat-message-${m.identity}`}>
