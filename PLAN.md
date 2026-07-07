@@ -8,14 +8,15 @@
 | Chunker | Done | Structure-aware, token-budgeted, overlap carry, extracts `[[links]]` into metadata |
 | ChromaDB store | Done | Upsert + query via `chroma_store.py` |
 | VectorService | Done | Clean public API: `ingest_file`, `ingest_directory`, `query` |
-| Embeddings | Done (OpenAI only) | `e_model.py` via `langchain-openai` — local option TBD |
-| LMStudio inference | Done (basic) | `ModelInterface` in `inference.py`, raw prompt → LMStudio → response |
-| Chat log (SQLite) | Done | `ChatLogStore`, messages persisted by id/timestamp |
-| PyWebView host | Done | `JsApi` bridge wired: ingest, query, send_chat |
-| React frontend | Unknown | Exists under `modules/user_interface/web/` — needs review |
-| RAG loop | **Missing** | Vector search never called during chat — the core gap |
+| Embeddings | Done (local) | `e_model.py` via `lmstudio` SDK, `text-embedding-nomic-embed-text-v1.5` — OpenAI dependency removed |
+| LMStudio inference | Done | `ModelInterface` in `inference.py`, includes RAG prompt injection |
+| RAG loop | Done | `ModelInterface._build_rag_prompt()` queries `VectorService` and folds top-5 chunks into the prompt |
+| Chat log (SQLite) | Done | `ChatLogStore`, messages persisted by id/timestamp, `list_messages()` added for history |
+| PyWebView host | Done | `JsApi` bridge wired: ingest, query, send_chat, get_chats |
+| React frontend | Done (basic) | Home, DataViewer, QueryScreen, and a Chat screen (`chat.tsx`) wired to `send_chat`/`get_chats`. Chat now streams responses token-by-token with a live thinking/answer split. Window launches maximized; shared `Header` component across screens; Home nav reordered (Chat first); app shell is a flex row so a threads sidebar can be added later without restructuring. |
 | File watcher | **Missing** | No automatic re-ingestion when notes change |
-| `get_chats()` | **Stub** | JsApi method has no body — chat history not surfaced to UI |
+| Chat threads/history UI | **Missing** | Messages persist to SQLite but there's no thread concept yet — single flat log |
+| Knowledge-graph-aware retrieval | **Missing** | `[[links]]` extracted into chunk metadata but never used at query time — see Open Questions |
 
 ---
 
@@ -56,11 +57,11 @@
 
 ## Known Bugs / Debt
 
-- `e_model.py` reads `OPENAI_KEY` from env but `.env` exports `OPENAI_API_KEY` — mismatch
-- `orc_settings.py` default model is still `gpt-4o-mini` — leftover from pre-LMStudio
 - `pipeline` class in `main_pipeline.py` has two `__init__` methods — Python silently ignores the first one
 - `discord_presence.py` imports `click` but doesn't use it
-- `get_chats()` in `JsApi` is an empty stub
+- `_LINK_RE` in `chunker.py` (`\[\[([^\]]+)\]\]`) matches Obsidian's embed syntax `![[...]]` too (the `!` doesn't break the match), so embedded images/attachments get swept into chunk `metadata["links"]` as if they were note-to-note links. Confirmed happening in the real vault (7 files use `![[...]]`). Needs a negative lookbehind or equivalent to exclude the `!`-prefixed form.
+- `langchain-openai` dependency in `pyproject.toml` is now dead weight — embeddings no longer use it
+- Pre-existing unused-var TS errors in `dataviewer.tsx`/`queryscreen.tsx` that would fail `tsc -b`/`npm run build` (dev mode via vite is unaffected)
 
 ---
 
@@ -77,5 +78,13 @@
 ## Open Questions
 
 - What Obsidian vault path should the watcher monitor? (user config or hardcoded for MVP?)
-- Does the React frontend have a working chat UI or does it need to be built?
-- Local embeddings: sentence-transformers sufficient, or do we want embedding quality closer to OpenAI's?
+- Chat threads: traditional per-conversation threads like most chatbot apps, or something else? Undecided — SQL storage exists (`ChatLogStore`) but nothing above it treats messages as belonging to separate conversations yet.
+- Link resolution: wikilink targets (`[[Note Name]]`) aren't resolved to actual file paths — same note title can exist in multiple folders (e.g. two different "Statistics" notes, one in /statistics one in /biology). Decided to defer a real resolver until there's architectural pressure to build one; in the meantime, lean on Chroma's `where` filter against filename at query time to close part of the gap.
+- Planning/tracking: currently just this file. Once there are too many moving parts to track here, plan to move task tracking to GitHub (issues/project board) instead of continuing to expand this doc.
+
+---
+
+## Near-term backlog (added 2026-07-04)
+
+- Fix `_LINK_RE` to exclude embed syntax `![[...]]` (see Known Bugs above)
+- Chat threads/history: SQLite storage exists but nothing above it groups messages into conversations yet — needs the traditional-vs-alternative decision above resolved first. The app shell (`.app-container`) is now a flex row specifically so a threads sidebar can be added later without restructuring existing screens.
