@@ -4,6 +4,7 @@ import './styles/main.css'
 import type { ChatMessage } from "../types/data_types";
 import { getPywebviewApi } from "../pywebviewApi";
 
+
 interface ChatScreenProps {
     onNavigate: (to: Screen) => void;
 }
@@ -14,11 +15,13 @@ function stripThinking(text: string): string {
     return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 }
 
+
 const ChatScreen = ({ onNavigate }: ChatScreenProps) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputText, setInputText] = useState<string>("");
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [streamingMessage, setStreamingMessage] = useState<{ content: string; thinking: string } | null>(null);
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -27,6 +30,21 @@ const ChatScreen = ({ onNavigate }: ChatScreenProps) => {
         api.get_chats().then((res) => setMessages(res.messages)).catch((e) => {
             console.error("Error loading chat history:", e);
         });
+    }, []);
+
+    useEffect(() => {
+        // inference.py drops the literal <think>/</think> boundary-marker fragments;
+        // everything else arrives tagged so we can grow the two buckets independently.
+        (window as any)._onChatFragment = (fragment: { content: string; reasoning_type: string }) => {
+            if (fragment.reasoning_type === "reasoning") {
+                setStreamingMessage(prev => prev && ({ ...prev, thinking: prev.thinking + fragment.content }));
+            } else if (fragment.reasoning_type === "none") {
+                setStreamingMessage(prev => prev && ({ ...prev, content: prev.content + fragment.content }));
+            }
+        };
+        return () => {
+            delete (window as any)._onChatFragment;
+        };
     }, []);
 
     useEffect(() => {
@@ -54,7 +72,7 @@ const ChatScreen = ({ onNavigate }: ChatScreenProps) => {
         setInputText("");
         setSending(true);
         setError(null);
-
+        setStreamingMessage({ content: "", thinking: "" });
         try {
             const res = await api.send_chat(prompt);
             if (res.error || !res.text) {
@@ -75,6 +93,7 @@ const ChatScreen = ({ onNavigate }: ChatScreenProps) => {
             setError(err?.message ?? "Unknown error occurred while sending message.");
         } finally {
             setSending(false);
+            setStreamingMessage(null);
         }
     }
 
@@ -91,7 +110,18 @@ const ChatScreen = ({ onNavigate }: ChatScreenProps) => {
                         <div className="chat-message-text">{stripThinking(m.text)}</div>
                     </div>
                 ))}
-                {sending && <div className="chat-message chat-message-ai chat-message-pending">Thinking...</div>}
+                {streamingMessage != null && (
+                    <>
+                        {streamingMessage.thinking && (
+                            <div className="chat-message chat-message-ai chat-message-reasoning">
+                                {streamingMessage.thinking}
+                            </div>
+                        )}
+                        <div className="chat-message chat-message-ai chat-message-pending">
+                            {streamingMessage.content || "Thinking..."}
+                        </div>
+                    </>
+                )}
                 <div ref={bottomRef} />
             </div>
             {error && <p className="error-message">Error: {error}</p>}

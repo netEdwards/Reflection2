@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from dataclasses import asdict
 from pathlib import Path
-
+import json
 
 import webview
 
@@ -25,7 +25,11 @@ def get_vector_service() -> VectorService:
 def get_model_interface() -> ModelInterface:
     global _model_interface
     if _model_interface is None:
-        _model_interface = ModelInterface()
+        _model_interface = ModelInterface(
+            on_fragment=lambda data: get_main_window().evaluate_js(
+                f"window._onChatFragment({json.dumps(data)})"
+            )
+        )
     return _model_interface
 
 class JsApi:
@@ -226,7 +230,7 @@ def main():
     set_main_window(window)
     #api.window = window
 
-    webview.start()
+    webview.start(debug=True)
 
 
 if __name__ == "__main__":
