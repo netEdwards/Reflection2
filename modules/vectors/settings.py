@@ -86,7 +86,7 @@ def get_settings() -> VectorsSettings:
 
     collection_name = cfg("CHROMA_COLLECTION", "reflection_notes")
 
-    emb_model = cfg("EMBEDDING_MODEL", "text-embedding-nomic-embed-text-v1.5:2")
+    emb_model = cfg("EMBEDDING_MODEL", "text-embedding-nomic-embed-text-v1.5")
     emb_batch = int(cfg("EMBEDDING_BATCH_SIZE", 64))
 
     return VectorsSettings(
