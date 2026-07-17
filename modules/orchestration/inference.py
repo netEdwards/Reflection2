@@ -1,10 +1,9 @@
 from datetime import datetime
 import uuid
-from modules.orchestration.message import Message
 from dotenv import load_dotenv
 import lmstudio as lms
 
-from modules.orchestration.sql.chatLogStore import ChatLogStore
+from modules.orchestration.sql.chatLogStore import ChatLogStore, Message
 from modules.orchestration.orc_settings import get_settings
 from modules.vectors.VectorService import VectorService
 load_dotenv()
@@ -17,11 +16,12 @@ class ModelInterface:
         
         
         
-    def invoke(self, prompt: str) -> Message:
+    def invoke(self, prompt: str, thread_id: str) -> Message:
         """Primitive invokation function to just call the endpoint.
 
         Args:
             prompt (str): the text or string from the users input prompt.
+            thread_id (str): id of the thread this response belongs to.
 
         Returns:
             Message: The returned Message object containing the endpoints response
@@ -60,6 +60,7 @@ class ModelInterface:
         text = response.content
         
         return Message(
+            thread_id=thread_id,
             id=str(uuid.uuid4()),
             text=text,
             identity="ai",
@@ -82,11 +83,11 @@ class ModelInterface:
         
         chat_logger = ChatLogStore()
 
-        chat_logger.add(msg)
+        chat_logger.add_message(msg)
         prompt = self._build_rag_prompt(msg.text)
-        resp = self.invoke(prompt)
+        resp = self.invoke(prompt, thread_id=msg.thread_id)
         if isinstance(resp, Message):
-            chat_logger.add(resp)
+            chat_logger.add_message(resp)
             return resp
         else:
             raise Exception("There was an error in invoking the LLM.")
@@ -122,8 +123,9 @@ class ModelInterface:
             f"Question: {user_text}"
         )
 
-    def run_text(self, input: str) -> Message:
+    def run_text(self, input: str, thread_id: str) -> Message:
         msg = Message(
+            thread_id=thread_id,
             id=str(uuid.uuid4()),
             identity="user",
             text=input,

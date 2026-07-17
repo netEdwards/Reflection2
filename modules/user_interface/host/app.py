@@ -149,40 +149,47 @@ class JsApi:
 
     # --- Model Interface -------------------------------------------------------
     
-    def send_chat(self, prompt: str) -> dict:
-        """Send a message to the orchestration interface, recieve a dictionary containing an endpoint or local models response. 
+    def send_chat(self, prompt: str, thread_id: str) -> dict:
+        """Send a message to the orchestration interface, recieve a dictionary containing an endpoint or local models response.
 
         Args:
             prompt (str): Clean string of users prompt.
+            thread_id (str): id of the thread this message belongs to.
 
         Returns:
             dict: Serialized message object from orchestration.
         """
-        model_interface = get_model_interface()
         if not prompt:
             return {
                 "error": "No prompt provided."
             }
-            
-        resp = model_interface.run_text(prompt)
+        if not thread_id:
+            return {
+                "error": "No thread selected."
+            }
+        model_interface = get_model_interface()
+
+        resp = model_interface.run_text(prompt, thread_id)
         if not resp.text:
             return {
                 "error": "There was an error with the response."
             }
-        
+
         return {
             "id": resp.id,
+            "thread_id": resp.thread_id,
             "identity": resp.identity,
             "text": resp.text,
             "timestamp": resp.timestamp.isoformat(),
         }
-    
-    def get_chats(self, t_from: str | None = None, t_to: str | None = None) -> dict:
-        """A function to retrieve a set of messages from the sql database.
+
+    def get_chats(self, thread_id: str, t_from: str | None = None, t_to: str | None = None) -> dict:
+        """A function to retrieve a set of messages for a single thread from the sql database.
         Uses a time frame to retrieve a set of messages.
         You can pass `t_from` as None and then a `t_to` datatime to get present to a specific date.
 
         Args:
+            thread_id (str): id of the thread to list messages for.
             t_from (str): ISO Format Datetime
             t_to (str): ISO Format Datetime
 
@@ -190,11 +197,12 @@ class JsApi:
             dict: messages
         """
         chat_logger = ChatLogStore()
-        messages = chat_logger.list_messages(t_from=t_from, t_to=t_to)
+        messages = chat_logger.list_messages(thread_id, t_from=t_from, t_to=t_to)
         return {
             "messages": [
                 {
                     "id": m.id,
+                    "thread_id": m.thread_id,
                     "identity": m.identity,
                     "text": m.text,
                     "timestamp": m.timestamp if isinstance(m.timestamp, str) else m.timestamp.isoformat(),
@@ -202,6 +210,66 @@ class JsApi:
                 for m in messages
             ]
         }
+
+    # --- Threads -------------------------------------------------------
+
+    def create_thread(self, title: str = "New Chat") -> dict:
+        """Create a new thread. JS: window.pywebview.api.create_thread(title)
+
+        Args:
+            title (str): Display name for the thread. Defaults to "New Chat".
+
+        Returns:
+            dict: the created thread (id, title, created_at), or an error dict.
+        """
+        chat_logger = ChatLogStore()
+        thread_id = chat_logger.create_thread(title)
+        thread = chat_logger.get_thread(thread_id)
+        if thread is None:
+            return {"error": "Thread was created but could not be re-read."}
+        return {
+            "id": thread.id,
+            "title": thread.title,
+            "created_at": thread.created_at,
+        }
+
+    def list_threads(self, t_from: str | None = None, t_to: str | None = None) -> dict:
+        """List all threads. JS: window.pywebview.api.list_threads()
+
+        Args:
+            t_from (str): ISO Format Datetime lower bound on creation time.
+            t_to (str): ISO Format Datetime upper bound on creation time.
+
+        Returns:
+            dict: threads
+        """
+        chat_logger = ChatLogStore()
+        threads = chat_logger.list_threads(t_from=t_from, t_to=t_to)
+        return {
+            "threads": [
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "created_at": t.created_at,
+                }
+                for t in threads
+            ]
+        }
+
+    def delete_thread(self, thread_id: str) -> dict:
+        """Delete a thread and its messages (cascade). JS: window.pywebview.api.delete_thread(thread_id)
+
+        Args:
+            thread_id (str): id of the thread to delete.
+
+        Returns:
+            dict: {"success": bool}, or an error dict if no thread_id was given.
+        """
+        if not thread_id:
+            return {"error": "No thread_id provided."}
+        chat_logger = ChatLogStore()
+        deleted = chat_logger.remove_thread(thread_id)
+        return {"success": deleted}
 
 def _get_web_url() -> str:
     """
