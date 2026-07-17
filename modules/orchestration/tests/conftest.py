@@ -1,7 +1,7 @@
 
 import pytest
 
-from modules.vectors.settings import get_settings
+from modules.orchestration.orc_settings import get_settings
 
 
 @pytest.fixture

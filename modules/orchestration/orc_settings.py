@@ -52,6 +52,7 @@ class OrchestrationSettings:
     request_timeout_s: float
     
     messages_table_name: str
+    threads_table_name: str
 
     @property
     def config_path(self) -> Path:
@@ -90,6 +91,7 @@ def get_settings() -> OrchestrationSettings:
     request_timeout_s = float(cfg("REQUEST_TIMEOUT_S", 30.0))
     
     messages_table_name = str(cfg("MSG_TABLE_NAME", "messages"))
+    threads_table_name = str(cfg("THREADS_TABLE_NAME", "threads"))
 
     return OrchestrationSettings(
         base_data_dir=base_data_dir,
@@ -98,4 +100,5 @@ def get_settings() -> OrchestrationSettings:
         default_model=default_model,
         request_timeout_s=request_timeout_s,
         messages_table_name=messages_table_name,
+        threads_table_name=threads_table_name
     )
